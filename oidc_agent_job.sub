@@ -1,0 +1,9 @@
+getenv = True
+transfer_input_files = /home/matlabuser/.oidc-agent/dodas
+executable = /home/matlabuser/oidc_agent_job.sh
+log = oidc_agent.log
+output = oidc_agent.out
+error = oidc_agent.err
+should_transfer_files = Yes
+when_to_transfer_output = ON_EXIT
+queue

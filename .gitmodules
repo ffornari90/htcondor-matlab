@@ -1,0 +1,3 @@
+[submodule "t2u2"]
+  path = htcondor/t2u2
+  url = https://baltig.infn.it/budda/t2u2.git

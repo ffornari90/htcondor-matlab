@@ -1,0 +1,40 @@
+# database file path
+db: /etc/t2u2/db
+
+# log level
+log:
+  # possible values: debug, info, warning, error, critical
+  level: info
+
+# address and port number to bind
+address: 0.0.0.0                       # any network interface
+port: 9999
+
+# SSL/TLS configuration
+ssl:
+  disable: true
+  #cert: /etc/t2u2/cert.pem
+  #key: /etc/t2u2/key.pem
+
+# mapping policies
+policies:
+  allow_untrusted_issuer: false        # default
+
+  trusted_issuers:
+    - https://iam-t1-computing.cloud.cnaf.infn.it
+    - https://iam.cloud.infn.it/
+
+  # each group is a IAM group
+  groups:
+    admins:
+      reuse_users: true                # default: false
+      users:
+        # each user must be a valid local Unix user
+        - condor
+        - condor_pool
+    #dteam:
+      #users:
+        # users can be defined via a common pattern and a numeric interval in a
+        # concise way. E.g., users from dteam001 through dteam100:
+        #pattern: "dteam%03d"           # pattern like in `man 3 printf`
+        #range: [1, 100]                # interval begin and end, included

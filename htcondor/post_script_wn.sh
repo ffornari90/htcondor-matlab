@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+su - condor_pool -s /bin/bash -c 'source /usr/local/share/dodasts/script/oidc_agent_init.sh && export BASE_CACHE_DIR="/usr/local/share/dodasts/sts-wire/cache" && umask 0002 && mkdir -p /s3/"${USERNAME}" && sts-wire https://iam.cloud.infn.it/ "${USERNAME}" https://minio.cloud.infn.it/ "/${USERNAME}" "/s3/${USERNAME}" --tryRemount --rcloneMountFlags "--poll-interval 1s" &>"/var/log/sts-wire/mount_log_${USERNAME}.txt"'
