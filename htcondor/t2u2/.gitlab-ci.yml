@@ -1,0 +1,59 @@
+stages:
+- build
+- test
+- package
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+BuildTestIssuer:
+  stage: build
+  image: baltig.infn.it:4567/budda/t2u2/t2u2-build:latest
+  script:
+  - source scl_source enable devtoolset-11 || true
+  - cmake -S test/issuer -B build_issuer
+    -DCMAKE_BUILD_TYPE=Release
+    -DBOOST_INCLUDEDIR=/usr/include/boost169
+    -DBOOST_LIBRARYDIR=/usr/lib64/boost169
+    -DOPENSSL_ROOT_DIR=/usr/include/openssl11/
+    -DOPENSSL_CRYPTO_LIBRARY=/usr/lib64/openssl11/libcrypto.so
+    -DOPENSSL_SSL_LIBRARY=/usr/lib64/openssl11/libssl.so
+  - cmake --build build_issuer
+  artifacts:
+    paths:
+    - build_issuer
+
+BuildT2U2:
+  stage: build
+  image: baltig.infn.it:4567/budda/t2u2/t2u2-build:latest
+  script:
+  - source scl_source enable devtoolset-11 || true
+  - cmake -S external/yaml-cpp/ -B build_yaml_cpp -DCMAKE_BUILD_TYPE=Release
+  - cmake --build build_yaml_cpp
+  - cmake --build build_yaml_cpp -- install
+  - cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+    -DBOOST_INCLUDEDIR=/usr/include/boost169
+    -DBOOST_LIBRARYDIR=/usr/lib64/boost169
+    -DOPENSSL_ROOT_DIR=/usr/include/openssl11/
+    -DOPENSSL_CRYPTO_LIBRARY=/usr/lib64/openssl11/libcrypto.so
+    -DOPENSSL_SSL_LIBRARY=/usr/lib64/openssl11/libssl.so
+  - cmake --build build
+  artifacts:
+    paths:
+    - build
+
+Test:
+  stage: test
+  image: baltig.infn.it:4567/budda/t2u2/t2u2-build:latest
+  script:
+  - ./build_issuer/issuer -g dteam &
+  - ISSUER_PID=$!
+  - ./build/src/t2u2 --configfile test/test.yml &
+  - T2U_PID=$!
+  - sleep 5
+  - TOKEN=$(curl 127.0.0.1:8080)
+  - "curl -H \"Authorization: Bearer $TOKEN\" 127.0.0.1:9090/validate"
+  - "curl -H \"Authorization: Bearer $TOKEN\" 127.0.0.1:9090/map"
+  after_script:
+  - kill $ISSUER_PID
+  - kill $T2U_PID
